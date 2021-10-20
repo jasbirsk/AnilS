@@ -1,0 +1,72 @@
+props---
+
+
+[Nike_Security_Jwt]
+SHOULD_LINEMERGE=true
+LINE_BREAKER=([\r\n]+)
+BREAK_ONLY_BEFORE_DATE=true
+EVAL-nike_geo=case(nike_store_no<=500, "us", nike_store_no<=1000, "emea", nike_store_no<=2000, "undefined", nike_store_no<=2999, "emea", nike_store_no<=3199, "jp", nike_store_no<=3299, "hk", nike_store_no<=3399, "tw", nike_store_no<=3999, "gc", nike_store_no<=5999, "undefined", nike_store_no<=6600, "brazil", nike_store_no<=6650, "mexico", 0=0, "undefined")
+EXTRACT-0=^(?<nike_platform>\w{2})(?<nike_region>\w{2})0*(?<nike_store_no>\d+)(?<nike_device_type>\w{2})0*(?<nike_device_no>\d+)$ in host
+TRUNCATE=0
+
+
+
+
+inputs----
+
+
+[monitor://D:\NSB\Coalition\LOGS\Nike.Security.Jwt\Nike.Security.Jwt.log]
+disabled = false
+index=windows_retail
+sourcetype=Nike_Security_Jwt
+ignoreOlderThan = 7d
+
+[monitor://C:\NSB\Coalition\LOGS\Nike.Security.Jwt\Nike.Security.Jwt.log]
+disabled = false
+index=windows_retail
+sourcetype=Nike_Security_Jwt
+ignoreOlderThan = 7d
+
+
+
+
+props----
+
+
+[Nike_Security_Jwt]
+SHOULD_LINEMERGE=true
+LINE_BREAKER=([\r\n]+)
+BREAK_ONLY_BEFORE_DATE=true
+NO_BINARY_CHECK=true
+ADD_EXTRA_TIME_FIELDS=True
+ANNOTATE_PUNCT=true
+AUTO_KV_JSON=true
+CHARSET=UTF-8
+DEPTH_LIMIT=1000
+DETERMINE_TIMESTAMP_DATE_WITH_SYSTEM_TIME=false
+EVAL-nike_geo=case(nike_store_no<=500, "us", nike_store_no<=1000, "emea", nike_store_no<=2000, "undefined", nike_store_no<=2999, "emea", nike_store_no<=3199, "jp", nike_store_no<=3299, "hk", nike_store_no<=3399, "tw", nike_store_no<=3999, "gc", nike_store_no<=5999, "undefined", nike_store_no<=6600, "brazil", nike_store_no<=6650, "mexico", 0=0, "undefined")
+EXTRACT-0=^(?<nike_platform>\w{2})(?<nike_region>\w{2})0*(?<nike_store_no>\d+)(?<nike_device_type>\w{2})0*(?<nike_device_no>\d+)$ in host
+LB_CHUNK_BREAKER_TRUNCATE=2000000
+LEARN_MODEL=true
+LEARN_SOURCETYPE=true
+LINE_BREAKER_LOOKBEHIND=100
+MATCH_LIMIT=100000
+MAX_DAYS_AGO=2000
+MAX_DAYS_HENCE=2
+MAX_DIFF_SECS_AGO=3600
+MAX_DIFF_SECS_HENCE=604800
+MAX_EVENTS=256
+MAX_TIMESTAMP_LOOKAHEAD=128
+SEGMENTATION=indexing
+SEGMENTATION-all=full
+SEGMENTATION-inner=inner
+SEGMENTATION-outer=outer
+SEGMENTATION-raw=none
+SEGMENTATION-standard=standard
+TRUNCATE=10000
+category=Custom
+detect_trailing_nulls=false
+disabled=false
+maxDist=100
+pulldown_type=true
+termFrequencyWeightedDist=false

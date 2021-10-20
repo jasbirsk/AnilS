@@ -1,0 +1,17 @@
+#Get the INdexed data from forwarders and HEC#
+earliest=-10m (index=_internal host=idx*.*.splunkcloud.com  source=*/metrics.log TERM(group=tcpin*) component=Metrics) OR (index="_introspection"  data.series=http_event_collector )  | eval GB=kb/1024/1024  | eval HECDataGB='data.total_bytes_indexed'/1024/1024/1024 | stats sum(GB) as ForwarderGB sum(HECDataGB) as HECGB| eval display=round(ForwarderGB,2)."/".round(HECGB,2)| fields display
+
+#Get current status of SPlunk upgraede#
+index=_introspection host=*.*.splunkcloud.com  component=Hostwide | stats max(data.splunk_version) as latest min(data.splunk_version) as earliest | mvexpand version  | eval status=if(latest=earliest,"Not upgrading - (".latest.")","Upgrade in Progress - From ".earliest." to ".latest) | table status
+
+# Get status if Splunk is being upgraded#
+index=_introspection host=*.splunkcloud.com  component=Hostwide | timechart span=1m dc(data.splunk_version)  as version_count values(data.splunk_version) as versions   | transaction maxspan=2h version_count | eval duration=round(duration/60,0)  | eval c_time=strftime(_time,"%m/%d/%y %H:%M:%S")  | search version_count=2|  eval message = " Upgrade took ".duration." minutes; finished at ".c_time | table message| 
+appendpipe [stats count| eval message="No upgrade detected during time period"  | where count==0 |table message]
+
+#no of forwarders connecting in 10 minutes#
+earliest=-10m host=idx*.*.splunkcloud.com NOT hostname=*.splunkcloud.com (index=_internal   source=*/metrics.log TERM(group=tcpin*) component=Metrics) | stats dc(hostname) as hosts
+
+
+
+
+aws ec2 run-instances --image-id ami-09620a6ebd47a0a6f --count 1 --instance-type t2.medium --key-name opsintel0x4a2969_prd --security-group-ids sg-09de87c67e7ed7dcc --subnet-id subnet-acca31d5 --iam-instance-profile 'Arn=arn:aws:iam::890831765352:instance-profile/opsintel0x4a2969-ec2-instance-profile' --profile opsintel --region us-west-2
